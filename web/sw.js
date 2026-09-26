@@ -1,8 +1,8 @@
 // Offline support: cache the app shell, data and CDN libraries so the demo
 // still works if the venue Wi-Fi dies. Stale-while-revalidate for everything
 // except the live World Bank API check.
-const CACHE = "time-machine-v1";
-const SHELL = ["./", "index.html", "style.css", "manifest.webmanifest", "icons/icon.svg",
+const CACHE = "time-machine-v2";
+const SHELL = ["./", "index.html", "style.css", "scrapbook.css", "manifest.webmanifest", "icons/icon.svg",
   "js/main.js", "js/state.js", "js/util.js", "js/engine.js", "js/charts.js",
   "js/explore.js", "js/play.js", "js/whatif.js", "js/world.js", "js/proof.js",
   "data/summary.json", "data/countries.json", "data/engine.json",

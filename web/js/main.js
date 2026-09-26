@@ -1,6 +1,6 @@
 // App shell: loads data once, routes between pages via the URL hash (#/page/ISO).
 import { Engine } from "./engine.js";
-import { debounce, $ } from "./util.js";
+import { debounce, $, ransomify, doodles } from "./util.js";
 import { App } from "./state.js";
 import * as explore from "./explore.js";
 import * as play from "./play.js";
@@ -28,6 +28,8 @@ async function init() {
   App.byName = Object.fromEntries(Object.values(c).map(d => [d.name, d.iso3]));
   $("clist").innerHTML = Object.keys(App.byName).sort().map(n => `<option value="${n}">`).join("");
   document.querySelectorAll(".maxyr").forEach(el => (el.textContent = s.meta.max_analog_year));
+  document.fonts?.ready.then(() => document.querySelectorAll("[data-ransom]").forEach(ransomify));
+  doodles();
   for (const p of Object.values(PAGES)) p.init?.();
   addEventListener("hashchange", route);
   route();

@@ -78,3 +78,38 @@ export function confetti(n = 90) {
   };
   requestAnimationFrame(frame);
 }
+
+// ---------- scrapbook decorations ----------
+// Ransom-note headline: every letter cut from a different "magazine".
+// Deterministic (seeded by letter index) so it looks the same on every load.
+const CUTOUTS = [
+  { f: "'Abril Fatface', serif", bg: "#fffaf0", c: "#231a12" },
+  { f: "'Rubik Mono One', sans-serif", bg: "#df5f36", c: "#fffaf0", s: .78 },
+  { f: "'Special Elite', monospace", bg: "#fdf3d6", c: "#2f5fb3" },
+  { f: "Fraunces, serif", bg: "#231a12", c: "#fbf6ea" },
+  { f: "'Abril Fatface', serif", bg: "#f2c14e", c: "#231a12" },
+  { f: "'Rubik Mono One', sans-serif", bg: "#9cc3e6", c: "#231a12", s: .78 },
+  { f: "Fraunces, serif", bg: "#fbf6ea", c: "#df5f36" },
+  { f: "'Special Elite', monospace", bg: "#e8b4c0", c: "#231a12" },
+];
+export function ransomify(el) {
+  const text = el.dataset.ransom || el.textContent;
+  el.setAttribute("aria-label", text);
+  let i = 0;
+  el.innerHTML = text.split(" ").map(word => `<span class="w" aria-hidden="true">${[...word].map(ch => {
+    const k = (i * 7 + ch.charCodeAt(0) * 3) % CUTOUTS.length, st = CUTOUTS[k];
+    const r = ((i * 37) % 13) - 6, y = ((i * 53) % 7) - 3;
+    i++;
+    return `<span class="l" style="--r:${r}deg;font-family:${st.f};background:${st.bg};color:${st.c};transform:rotate(${r}deg) translateY(${y}px);${st.s ? `font-size:${st.s}em;` : ""}animation-delay:${i * 28}ms">${ch}</span>`;
+  }).join("")}</span>`).join(" ");
+}
+
+const DOODLES = {
+  question: `<svg viewBox="0 0 38 54" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M8 14c0-8 7-11 13-10s11 6 9 12-9 8-10 15v5"/><circle cx="20" cy="47" r="2.4" fill="currentColor"/></svg>`,
+  sparkle: `<svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M13 2v7M13 17v7M2 13h7M17 13h7M6 6l3 3M17 17l3 3M20 6l-3 3M6 20l3-3"/></svg>`,
+  arrow: `<svg viewBox="0 0 90 50" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M86 8C60 2 30 10 16 36"/><path d="M8 26l8 12 12-6"/></svg>`,
+  heart: `<svg viewBox="0 0 30 28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M15 25C5 17 2 12 3 8s7-6 12 0c5-6 11-4 12 0s-2 9-12 17z"/></svg>`,
+};
+export function doodles(root = document) {
+  root.querySelectorAll("[data-doodle]").forEach(el => { if (!el.innerHTML) el.innerHTML = DOODLES[el.dataset.doodle] || ""; });
+}

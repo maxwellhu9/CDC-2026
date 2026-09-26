@@ -5,18 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Development Time Machine</title>
 <meta name="description" content="Every country has been here before. Find a country's historical look-alikes and see what happened next.">
-<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#d9bc92" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#2a231c" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Time Machine">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=Caveat:wght@500;700&family=Special+Elite&family=Abril+Fatface&family=Rubik+Mono+One&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="scrapbook.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="wobble" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/>
+    <feDisplacementMap in="SourceGraphic" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 <nav class="topnav">
   <a class="brand" href="#/explore">
     <svg class="dial" viewBox="0 0 512 512" aria-hidden="true"><path d="M124.9 176.2A160 160 0 1 1 98.4 295.8" fill="none" stroke="var(--you)" stroke-width="44" stroke-linecap="round"/><polygon points="92,222 172,196 94,140" fill="var(--you)" stroke="var(--you)" stroke-width="18" stroke-linejoin="round"/><path d="M256 180v88l-56 38" fill="none" stroke="var(--twin)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -34,14 +41,20 @@
 <main>
   <!-- ================= EXPLORE ================= -->
   <div class="page" id="page-explore">
+    <div class="hero">
+    <div class="doodle hide-sm" data-doodle="question" style="right:4%;top:-6px;width:38px;height:54px;transform:rotate(12deg)"></div>
+    <div class="doodle hide-sm" data-doodle="sparkle" style="right:16%;top:40px;width:26px;height:26px"></div>
+    <div class="doodle hide-sm" data-doodle="sparkle" style="right:1%;top:120px;width:18px;height:18px"></div>
     <div class="kicker">Carolina Data Challenge 2026 · Graduate Track</div>
-    <h1>Every country has been here before.</h1>
+    <h1 class="ransom scribble" data-ransom="Every country has been here before.">Every country has been here before.</h1>
     <p class="lede">Pick a country. We search 55 years of World Bank data for the moments other countries looked most like it does today, then use what happened to them <em>next</em> to sketch its possible futures.</p>
     <div class="picker">
       <input id="ex-search" list="clist" placeholder="Type a country…" autocomplete="off" aria-label="Choose a country">
       <button class="btn ghost" id="ex-random" title="Random country">🎲 Surprise me</button>
     </div>
-    <div class="chips" id="ex-quick" style="margin-top:10px"></div>
+    <div class="chips" id="ex-quick" style="margin-top:12px"></div>
+    <div class="doodle hide-sm" data-doodle="arrow" style="left:calc(min(320px, 60%) + 150px);top:auto;bottom:40px;width:90px;height:50px"></div>
+    </div>
 
     <div class="headline" id="ex-headline"></div>
 
@@ -54,7 +67,7 @@
     <section class="block">
       <h2>Ghost paths</h2>
       <p class="sub">Each gray line is one look-alike's real GDP per person over the following decade, rescaled to start from where this country is today. The shaded band covers the middle 80% of those futures. Hover over a line to see whose it is, or click to select it.</p>
-      <div class="panel">
+      <div class="panel taped">
         <div class="legend"><span style="--c:var(--you)">This country</span><span style="--c:var(--twin)">Selected look-alike</span><span style="--c:var(--ghost)">Other look-alikes</span><span class="dash" style="--c:var(--you)">Median forecast</span><span class="band">80% range</span></div>
         <div id="ex-ghost"></div>
       </div>
@@ -63,7 +76,7 @@
     <section class="block">
       <h2>Rewind</h2>
       <p class="sub">Drag through this country's history. Each year, the engine runs a fresh search in your browser for who it resembled at that time.</p>
-      <div class="panel rewind">
+      <div class="panel taped rewind">
         <div>
           <div class="now" id="rw-text"></div>
           <div class="ctrl">
@@ -79,7 +92,7 @@
     <section class="block">
       <h2>Fingerprint</h2>
       <p class="sub">How the selected look-alike compares on every indicator, measured in standard deviations from the world average. A short line between the dots means a close match.</p>
-      <div class="panel"><div id="ex-finger"></div></div>
+      <div class="panel taped graph"><div id="ex-finger"></div></div>
     </section>
 
     <section class="block">
@@ -95,7 +108,7 @@
   <!-- ================= WHAT IF ================= -->
   <div class="page" id="page-whatif">
     <div class="kicker">Scenario sandbox</div>
-    <h1>What if…?</h1>
+    <h1 class="scribble">What if…?</h1>
     <p class="lede">Change a country's indicators and see whose history it would be following. Every slider move re-runs the look-alike search on about 12,000 country-years.</p>
     <div class="picker">
       <input id="wi-search" list="clist" placeholder="Start from a country…" autocomplete="off" aria-label="Starting country">
@@ -123,13 +136,13 @@
   <!-- ================= WORLD ================= -->
   <div class="page" id="page-world">
     <div class="kicker">The whole planet</div>
-    <h1>The next decade, everywhere.</h1>
+    <h1 class="scribble">The next decade, everywhere.</h1>
     <p class="lede">Every country's forecast on one map. Tap any country to explore it.</p>
     <div class="toggle" id="w-toggle" style="margin-top:20px">
       <button data-m="growth" class="on">📈 Projected growth</button>
       <button data-m="era">⏳ Which era it lives in</button>
     </div>
-    <div class="panel"><div id="w-map"></div><div id="w-key"></div></div>
+    <div class="panel taped"><div id="w-map"></div><div id="w-key"></div></div>
     <div class="grid2" style="margin-top:16px">
       <div class="panel"><p class="ctitle" id="w-top-t"></p><ol class="rank" id="w-top"></ol></div>
       <div class="panel"><p class="ctitle" id="w-bot-t"></p><ol class="rank" id="w-bot"></ol></div>
@@ -139,7 +152,7 @@
   <!-- ================= PROOF ================= -->
   <div class="page" id="page-proof">
     <div class="kicker">Does it actually work?</div>
-    <h1>We tried to fool ourselves. Here's what happened.</h1>
+    <h1 class="scribble">We tried to fool ourselves. Here's what happened.</h1>
     <p class="lede">We stood in 1995, 2000, 2005, 2010 and 2014 and made 10-year forecasts using <em>only</em> data available at the time. Then we compared them with what really happened: about 1,000 forecasts per outcome. Lower error is better.</p>
 
     <section class="block">
@@ -159,14 +172,21 @@
     </section>
 
     <section class="block method">
-      <h2>Method details</h2>
-      <p><b>Data.</b> A Python pipeline calls <code>api.worldbank.org/v2/country/all/indicator/{code}</code> for each indicator and follows the pagination. Regional aggregates are dropped using <code>/v2/country</code> metadata, and small gaps are interpolated within each country.</p>
-      <p><b>Fingerprint.</b> Skewed indicators are log-transformed, and every indicator is converted to a z-score. Categories are weighted equally, except income, which counts double. We leave out era-specific technology like mobile phones, so 1985 and 2025 can be compared fairly.</p>
-      <p><b>Matching.</b> Weighted RMS distance over the indicators both country-years report, with at least 60% of the weight overlapping. Matches are kernel-weighted with a Gaussian, bandwidth = median distance.</p>
-      <p><b>Era correction.</b> A 1981 look-alike then lived through the 1980s debt crisis. So we measure each look-alike's growth relative to the world median in its own decade, then add back the long-run average. This is <em>analog forecasting</em> (Lorenz, 1969), a technique from meteorology applied to development data.</p>
-      <p><b>No look-ahead.</b> In the backtest, the pool of look-alikes, the z-score scaling and every baseline's training data only use what was known at each origin year.</p>
-      <p><b>Limits.</b> History rhymes rather than repeats. Look-alikes capture structure, not policy, conflict or luck. Our 80% ranges contain the true outcome about 70–78% of the time, so they are slightly too narrow.</p>
-      <p class="live" id="pf-live"></p>
+      <h2>The fine print</h2>
+      <div class="panel graph terms">
+        <h3>Terms &amp; Conditions of Forecasting</h3>
+        <ol>
+          <li><b>Data.</b> Every number is pulled by a Python pipeline from <code>api.worldbank.org/v2/country/all/indicator/{code}</code>, following the pagination. We drop regional aggregates using <code>/v2/country</code> metadata and interpolate small gaps within each country.</li>
+          <li><b>Fingerprint.</b> Each country-year is 18 z-scores covering income, economic structure, health, demography, education, size and momentum. Skewed indicators are logged. Income counts double, and every other category counts equally.</li>
+          <li><b>No time-bound tech.</b> Mobile phones and the internet are left out, so that 1985 and 2025 can be compared fairly.</li>
+          <li><b>Matching.</b> Weighted RMS distance over the indicators both country-years report, with at least 60% of the weight overlapping. We keep each country's single best year and take the 12 closest, with Gaussian kernel weights (bandwidth = median distance).</li>
+          <li><b>Era correction.</b> A 1981 look-alike then lived through the 1980s debt crisis. So we measure each look-alike's growth against the world median in its own decade, then add back the long-run average. This is analog forecasting (Lorenz, 1969), a technique from meteorology applied to development data.</li>
+          <li><b>No peeking.</b> In the backtest, the pool of look-alikes, the z-score scaling and every baseline's training data only use what was known at each origin year.</li>
+          <li><b>Side effects may include humility.</b> History rhymes rather than repeats. Look-alikes capture structure, not policy, conflict or luck. Our 80% ranges contain the truth about 70–78% of the time, so they are a bit too narrow.</li>
+          <li><b>Not financial or policy advice.</b> The What-if page shows whose <em>history</em> a scenario resembles, not what causes growth.</li>
+        </ol>
+        <p class="live" id="pf-live"></p>
+      </div>
     </section>
     <footer>Data: World Bank Open Data (CC BY 4.0). Built for Carolina Data Challenge 2026.</footer>
   </div>

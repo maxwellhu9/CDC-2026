@@ -1,6 +1,6 @@
 // Play: "Guess the Twin" — 5 rounds, pick which historical moment a country most resembles today.
 import { App, go } from "./state.js";
-import { GDP, $, fmtUSD, pct, flagOf, shuffle, confetti, fmtFeature } from "./util.js";
+import { GDP, $, pct, flagOf, shuffle, confetti, fmtFeature, ransomify, doodles } from "./util.js";
 
 const ROUNDS = 5;
 const RANKS = [
@@ -24,15 +24,20 @@ export function show() { if (!G || G.phase === "intro") intro(); }
 function intro() {
   G = { phase: "intro" };
   $("game").innerHTML = `
-    <div class="panel intro pop">
+    <div class="panel taped intro pop" style="position:relative">
+      <div class="doodle" data-doodle="question" style="left:8%;top:24px;width:30px;height:44px;transform:rotate(-14deg)"></div>
+      <div class="doodle" data-doodle="question" style="right:9%;top:40px;width:24px;height:36px;transform:rotate(10deg)"></div>
+      <div class="doodle" data-doodle="sparkle" style="right:20%;top:14px;width:20px;height:20px"></div>
       <div class="emoji">🕰️</div>
-      <h1 style="margin-top:12px">Guess the Twin</h1>
+      <h1 class="ransom" data-ransom="Guess the Twin" style="margin-top:12px;font-size:clamp(30px,6vw,52px)">Guess the Twin</h1>
       <p class="lede" style="margin:0 auto 22px">We show you a country as it is today. You guess which moment in history it most resembles.
         ${ROUNDS} rounds. Think you can read a country's fingerprint?</p>
       <button class="btn big" id="g-start">Start →</button>
       <p class="small muted" style="margin-top:14px">Tip: press 1–4 to answer and Enter to continue.</p>
     </div>`;
   $("g-start").onclick = start;
+  ransomify($("game").querySelector("[data-ransom]"));
+  doodles($("game"));
 }
 
 function start() {
@@ -81,7 +86,7 @@ function ask() {
     ["Urban", "SP.URB.TOTL.IN.ZS"], ["Recent growth", "GDP_GROWTH_5Y"]]
     .map(([l, c]) => `<span class="fact">${l} <b>${fmtFeature(c, d.raw[fi(c)])}</b></span>`).join("");
   $("game").innerHTML = `${hud()}
-    <div class="panel mystery pop">
+    <div class="panel taped mystery pop">
       <div class="flagbig">${flag(d.iso3)}</div>
       <div class="q">${d.name}, ${d.year}.<br>Which moment in history does it most resemble?</div>
       <div class="facts">${facts}</div>
@@ -108,6 +113,7 @@ function answer(i) {
     b.disabled = true; b.classList.add("reveal"); b.style.animation = "none";
     if (opts[j].correct) b.classList.add("right");
     else if (j === i) { b.classList.add("wrong"); b.style.animation = ""; }
+    if (j === i) b.insertAdjacentHTML("beforeend", `<span class="stamp ${ok ? "ok" : "no"}">${ok ? "On the nose" : "Nope"}</span>`);
   });
   if (ok) confetti(G.streak >= 3 ? 140 : 80);
   const c = opts.find(o => o.correct), t = c.t;
@@ -116,7 +122,7 @@ function answer(i) {
   const cheers = ["Nailed it!", "Spot on!", "Sharp eye!", "Exactly right!", "You're a natural!"];
   $("g-verdict").innerHTML = `
     <div class="verdict pop">
-      <div class="big">${ok ? `✅ ${cheers[G.i % cheers.length]}` : `❌ Not quite. It was ${flag(t.iso3)} ${t.name} in ${t.year}.`}</div>
+      <div class="big">${ok ? cheers[G.i % cheers.length] : `Not quite. It was ${flag(t.iso3)} ${t.name} in ${t.year}.`}</div>
       <p style="margin:8px 0 0">What happened next: over the following decade, ${t.name}'s GDP per person
         ${t.next_growth == null ? "is unknown" : `${t.next_growth >= 0 ? "grew" : "shrank"} <b>${(Math.abs(t.next_growth) * 100).toFixed(1)}%/yr</b>`}${t.next_le != null ? ` and life expectancy ${t.next_le >= 0 ? "rose" : "fell"} <b>${Math.abs(t.next_le).toFixed(1)} years</b>` : ""}.
         Across all 12 look-alikes, our median forecast for ${d.name} is <b>${pct(g)}/yr</b>.</p>
@@ -140,10 +146,10 @@ function next() {
   const share = `Development Time Machine: Guess the Twin\n${squares} ${n}/${ROUNDS} · ${G.score} pts · ${title} ${emoji}`;
   if (n >= 4) confetti(180);
   $("game").innerHTML = `
-    <div class="panel end pop">
+    <div class="panel taped end pop">
       <div style="font-size:52px">${emoji}</div>
       <div class="score">${n}/${ROUNDS}</div>
-      <div class="rank">${title}</div>
+      <div class="passport">Certified · ${title}</div>
       <p class="muted" style="margin:6px 0 4px">${G.score} points</p>
       <div style="font-size:26px;letter-spacing:4px;margin:10px 0 20px">${squares}</div>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">

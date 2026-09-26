@@ -44,7 +44,7 @@ function drawHeadline(d, animate) {
   const le = d.forecasts["SP.DYN.LE00.IN"], leEnd = le && le.fan[le.fan.length - 1];
   $("ex-headline").innerHTML = `
     <div class="big pop">${flag(d.iso3)} <span class="you">${d.name}</span> in ${d.year} looks most like
-      ${flag(t.iso3)} <span class="tw">${t.name}</span> in ${t.year}.</div>
+      ${flag(t.iso3)} <span class="tw">${t.name}</span> in ${t.year}.<span class="note">${d.year - t.year} years back ↩</span></div>
     <div class="stats">
       <div class="stat panel pop"><div class="v" id="st-sim"></div><div class="l">match to ${t.name} ${t.year}</div></div>
       <div class="stat panel pop" style="animation-delay:.05s"><div class="v"><span id="st-g"></span><span style="font-size:15px">/yr</span></div>
@@ -64,7 +64,8 @@ function drawTwins(d) {
   const el = $("ex-twins");
   el.innerHTML = d.twins.map((t, i) => `
     <button class="twin ${i === twin ? "on" : ""}" data-i="${i}" style="animation-delay:${i * 30}ms">
-      <div>${flag(t.iso3)} <span class="n">${t.name}</span> <span class="y">${t.year}</span></div>
+      <div class="ph">${flag(t.iso3)}<span class="yr">${t.year}</span></div>
+      <div class="n">${t.name}</div>
       <div class="s">${t.similarity}% match · next decade ${t.next_growth == null ? "—" : pct(t.next_growth) + "/yr"}</div>
       <div class="bar"><i style="width:${(t.similarity / maxSim) * 100}%"></i></div>
     </button>`).join("");

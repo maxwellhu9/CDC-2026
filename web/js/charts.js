@@ -15,25 +15,25 @@ export function ghostChart(host, { name, hist, now, horizon, ghosts, fan, select
     .call(d3.axisLeft(y).tickValues(logTicks(y.domain())).tickFormat(d3.format("$,.0f")).tickSize(-(W - m.l - m.r)));
   svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(W < 520 ? 4 : 8, "d"));
   svg.append("line").attr("x1", x(now)).attr("x2", x(now)).attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--ink-3")).attr("stroke-dasharray", "3 3");
-  svg.append("text").attr("x", x(now) + 6).attr("y", m.t + 10).text("today →");
+  svg.append("text").attr("class", "anno").attr("x", x(now) + 6).attr("y", m.t + 14).text("today →");
 
   const curve = d3.curveMonotoneX;
   svg.append("path").datum(fan).attr("fill", css("--you-soft")).attr("d", d3.area().x(p => x(p.x)).y0(p => y(p.lo)).y1(p => y(p.hi)).curve(curve));
   const line = d3.line().x(p => x(p.x)).y(p => y(p.y)).curve(curve);
   const sel = ghosts.find(g => g.i === selected);
   const gp = svg.append("g").selectAll("path").data(ghosts.filter(g => g !== sel)).join("path")
-    .attr("fill", "none").attr("stroke", css("--ghost")).attr("stroke-width", 1.25).attr("d", g => line(g.pts));
+    .attr("class", "ink").attr("fill", "none").attr("stroke", css("--ghost")).attr("stroke-width", 1.4).attr("d", g => line(g.pts));
   // draw-in animation for the ghost lines
   gp.each(function () { const L = this.getTotalLength(); d3.select(this).attr("stroke-dasharray", `${L} ${L}`).attr("stroke-dashoffset", L).transition().duration(900).delay((_, i) => i * 40).attr("stroke-dashoffset", 0).on("end", function () { d3.select(this).attr("stroke-dasharray", null); }); });
   svg.append("path").datum(fan).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2).attr("stroke-dasharray", "5 4")
     .attr("d", d3.line().x(p => x(p.x)).y(p => y(p.mid)).curve(curve));
   if (sel) {
-    svg.append("path").attr("fill", "none").attr("stroke", css("--twin")).attr("stroke-width", 2.5).attr("d", line(sel.pts));
+    svg.append("path").attr("class", "ink").attr("fill", "none").attr("stroke", css("--twin")).attr("stroke-width", 2.8).attr("d", line(sel.pts));
     const last = sel.pts[sel.pts.length - 1];
-    if (m.r > 100) svg.append("text").attr("x", x(last.x) + 6).attr("y", y(last.y) + 4).style("fill", css("--ink")).style("font-weight", 600)
+    if (m.r > 100) svg.append("text").attr("class", "anno").attr("x", x(last.x) + 6).attr("y", y(last.y) + 6).style("fill", css("--twin")).style("font-weight", 700)
       .text(`${sel.name.length > 18 ? sel.iso3 : sel.name} ${sel.year}–${last.yr}`);
   }
-  svg.append("path").datum(hist).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.5).attr("d", line);
+  svg.append("path").datum(hist).attr("class", "ink").attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.8).attr("d", line);
 
   const pts = [...hist.map(p => ({ ...p, kind: "you" })), ...ghosts.flatMap(g => g.pts.map(p => ({ ...p, kind: "ghost", g })))];
   const dot = svg.append("circle").attr("r", 5).attr("fill", css("--surface")).attr("stroke-width", 2).style("opacity", 0);
@@ -91,7 +91,7 @@ export function fanSmall(host, { hist, fan, fmt, now }) {
   svg.append("path").datum(fan0).attr("fill", css("--you-soft")).attr("d", d3.area().x(p => x(p.x)).y0(p => y(p.lo)).y1(p => y(p.hi)).curve(d3.curveMonotoneX));
   svg.append("path").datum(fan0).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2).attr("stroke-dasharray", "5 4")
     .attr("d", d3.line().x(p => x(p.x)).y(p => y(p.mid)).curve(d3.curveMonotoneX));
-  svg.append("path").datum(hist).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2).attr("d", d3.line().x(p => x(p.x)).y(p => y(p.y)));
+  svg.append("path").datum(hist).attr("class", "ink").attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.4).attr("d", d3.line().x(p => x(p.x)).y(p => y(p.y)));
   const pts = [...hist.map(p => ({ x: p.x, v: p.y, t: "actual" })), ...fan.map(p => ({ x: p.x, v: p.mid, lo: p.lo, hi: p.hi, t: "median" }))];
   const rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--ink-3")).style("opacity", 0);
   svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
@@ -120,7 +120,7 @@ export function fanCompare(host, { now, base, baseFan, scenFan }) {
   const line = d3.line().x(p => x(p.x)).y(p => y(p.mid)).curve(d3.curveMonotoneX);
   svg.append("path").datum(B).attr("fill", css("--you-soft")).attr("d", area);
   svg.append("path").datum(A).attr("fill", "none").attr("stroke", css("--ghost")).attr("stroke-width", 2).attr("stroke-dasharray", "5 4").attr("d", line);
-  svg.append("path").datum(B).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.5).attr("d", line);
+  svg.append("path").datum(B).attr("class", "ink").attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.8).attr("d", line);
   const rule = svg.append("line").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--ink-3")).style("opacity", 0);
   svg.append("rect").attr("x", m.l).attr("y", m.t).attr("width", W - m.l - m.r).attr("height", H - m.t - m.b).attr("fill", "transparent")
     .on("mousemove", (ev) => {
@@ -144,7 +144,7 @@ export function sparkMarker(host, { path, year, label }) {
     svg.append("g").attr("class", "axis gridline").attr("transform", `translate(${m.l},0)`)
       .call(d3.axisLeft(y).tickValues(logTicks(y.domain())).tickFormat(d3.format("$,.0f")).tickSize(-(W - m.l - m.r)));
     svg.append("g").attr("class", "axis").attr("transform", `translate(0,${H - m.b})`).call(d3.axisBottom(x).ticks(5, "d"));
-    svg.append("path").datum(pts).attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2).attr("d", d3.line().x(p => x(p.x)).y(p => y(p.y)));
+    svg.append("path").datum(pts).attr("class", "ink").attr("fill", "none").attr("stroke", css("--you")).attr("stroke-width", 2.4).attr("d", d3.line().x(p => x(p.x)).y(p => y(p.y)));
     svg.append("line").attr("class", "mk").attr("y1", m.t).attr("y2", H - m.b).attr("stroke", css("--twin")).attr("stroke-width", 1.5);
     svg.append("circle").attr("class", "mk").attr("r", 5.5).attr("fill", css("--twin")).attr("stroke", css("--surface")).attr("stroke-width", 2);
     host.replaceChildren(svg.node());
@@ -162,7 +162,7 @@ export function scoreBars(host, { rows, fmt, ours, best, labels }) {
   const g = svg.selectAll("g").data(rows).join("g").attr("transform", (_, i) => `translate(0,${m.t + i * row})`);
   g.append("text").attr("x", m.l - 10).attr("y", row / 2 + 4).attr("text-anchor", "end")
     .style("fill", r => ours(r.k) ? css("--ink") : css("--ink-2")).style("font-weight", r => r.k === best ? 600 : 400).text(r => labels[r.k]);
-  g.append("rect").attr("x", m.l).attr("y", 6).attr("height", row - 12).attr("rx", 3).attr("width", 0)
+  g.append("rect").attr("class", "ink").attr("x", m.l).attr("y", 6).attr("height", row - 12).attr("rx", 2).attr("width", 0)
     .attr("fill", r => ours(r.k) ? css("--you") : css("--ghost")).transition().duration(700).delay((_, i) => i * 60).attr("width", r => x(r.mae) - m.l);
   g.append("text").attr("x", r => x(r.mae) + 6).attr("y", row / 2 + 4).text(r => fmt(r.mae) + (r.k === best ? "  ★" : ""));
   g.append("rect").attr("width", W).attr("height", row).attr("fill", "transparent")
