@@ -188,3 +188,36 @@ export async function choropleth(host, { valueOf, color, tipOf, onClick, selecte
     .filter(f => f.id === selected).raise();
   host.replaceChildren(svg.node());
 }
+
+// ---------- Lessons: fast vs slow twin groups, plus this country ----------
+// rows: [{short, label, code, fz, sz, cz, fr, sr, cr}] (z = std devs, r = raw)
+export function lessonsChart(host, { rows, name, fastLabel, slowLabel }) {
+  const W = host.clientWidth || 800, row = 30, narrow = W < 520;
+  const m = { t: narrow ? 62 : 30, r: 16, b: 26, l: W < 480 ? 128 : 190 };
+  const H = m.t + m.b + row * rows.length;
+  const x = d3.scaleLinear().domain([-3, 3]).range([m.l, W - m.r]).clamp(true);
+  const svg = d3.create("svg").attr("viewBox", `0 0 ${W} ${H}`);
+  svg.append("g").attr("class", "axis gridline").attr("transform", `translate(0,${H - m.b})`)
+    .call(d3.axisBottom(x).ticks(W < 480 ? 3 : 6).tickFormat(v => (v > 0 ? "+" : "") + v + "σ").tickSize(-(H - m.t - m.b)));
+  const keys = [[fastLabel, css("--twin")], [slowLabel, css("--ghost")], [name, css("--you")]];
+  // Legend: one row on wide screens, stacked on phones.
+  let lx = narrow ? 8 : m.l, ly = 8;
+  for (const [label, c] of keys) {
+    if (label === name) svg.append("path").attr("d", d3.symbol(d3.symbolDiamond, 70)()).attr("transform", `translate(${lx + 5},${ly})`).attr("fill", c);
+    else svg.append("circle").attr("cx", lx + 5).attr("cy", ly).attr("r", 5).attr("fill", c);
+    svg.append("text").attr("x", lx + 14).attr("y", ly + 4).style("fill", css("--ink")).text(label);
+    if (narrow) ly += 18;
+    else lx += 14 + label.length * 7 + 20; // text isn't in the DOM yet, so estimate its width
+  }
+  const g = svg.append("g").selectAll("g").data(rows).join("g").attr("transform", (_, i) => `translate(0,${m.t + row * i + row / 2})`);
+  g.append("text").attr("x", m.l - 10).attr("dy", 4).attr("text-anchor", "end").style("fill", css("--ink")).text(r => r.short);
+  g.append("line").attr("x1", r => x(r.sz)).attr("x2", r => x(r.fz)).attr("stroke", css("--twin")).attr("stroke-width", 3).attr("stroke-opacity", .35);
+  g.append("circle").attr("cx", r => x(r.sz)).attr("r", 6).attr("fill", css("--ghost")).attr("stroke", css("--surface")).attr("stroke-width", 2);
+  g.append("circle").attr("cx", r => x(r.fz)).attr("r", 6).attr("fill", css("--twin")).attr("stroke", css("--surface")).attr("stroke-width", 2);
+  g.filter(r => r.cz != null && isFinite(r.cz)).append("path").attr("d", d3.symbol(d3.symbolDiamond, 70)())
+    .attr("transform", r => `translate(${x(r.cz)},0)`).attr("fill", css("--you")).attr("stroke", css("--surface")).attr("stroke-width", 1.5);
+  g.append("rect").attr("x", 0).attr("y", -row / 2).attr("width", W).attr("height", row).attr("fill", "transparent")
+    .on("mousemove", (ev, r) => showTip(`<b>${r.label}</b><br><span style="color:${css("--twin")}">●</span> ${fastLabel}: ${fmtFeature(r.code, r.fr)}<br><span style="color:${css("--ghost")}">●</span> ${slowLabel}: ${fmtFeature(r.code, r.sr)}<br><span style="color:${css("--you")}">◆</span> ${name}: ${fmtFeature(r.code, r.cr)}`, ev))
+    .on("mouseleave", hideTip);
+  host.replaceChildren(svg.node());
+}
