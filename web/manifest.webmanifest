@@ -1,0 +1,15 @@
+{
+  "name": "Development Time Machine",
+  "short_name": "Time Machine",
+  "description": "Every country has been here before. Find a country's historical look-alikes and see what happened next.",
+  "start_url": "./#/explore",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f5f0",
+  "theme_color": "#f7f5f0",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
