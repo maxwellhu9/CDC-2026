@@ -3,10 +3,8 @@ import { App, go } from "./state.js";
 import { GDP, $, pct, flagOf, shuffle, confetti, fmtFeature, ransomify, doodles } from "./util.js";
 
 const ROUNDS = 5;
-const RANKS = [
-  [0, "Time Tourist", "🧳"], [2, "Junior Economist", "📊"], [3, "Development Detective", "🔍"],
-  [4, "World Bank Material", "🏦"], [5, "Time Lord", "⏳"],
-];
+// Short, honest end-of-game line per score.
+const VERDICTS = ["Tough round", "Tough round", "Not bad", "Solid", "Very good", "Perfect"];
 let G = null; // game state
 const flag = (c) => flagOf(App.flags[c]);
 const fi = (code) => App.meta.features.findIndex(f => f.code === code);
@@ -28,10 +26,9 @@ function intro() {
       <div class="doodle" data-doodle="question" style="left:8%;top:24px;width:30px;height:44px;transform:rotate(-14deg)"></div>
       <div class="doodle" data-doodle="question" style="right:9%;top:40px;width:24px;height:36px;transform:rotate(10deg)"></div>
       <div class="doodle" data-doodle="sparkle" style="right:20%;top:14px;width:20px;height:20px"></div>
-      <div class="emoji">🕰️</div>
       <h1 class="ransom" data-ransom="Guess the Twin" style="margin-top:12px;font-size:clamp(30px,6vw,52px)">Guess the Twin</h1>
-      <p class="lede" style="margin:0 auto 22px">We show you a country as it is today. You guess which moment in history it most resembles.
-        ${ROUNDS} rounds. Think you can read a country's fingerprint?</p>
+      <p class="lede" style="margin:0 auto 22px">You get a country as it is today and four countries from the past.
+        Pick the one our model says is the closest match. ${ROUNDS} rounds.</p>
       <button class="btn big" id="g-start">Start →</button>
       <p class="small muted" style="margin-top:14px">Tip: press 1–4 to answer and Enter to continue.</p>
     </div>`;
@@ -76,7 +73,7 @@ function hud() {
     return `<i class="${r === true ? "ok" : r === false ? "no" : i === G.i ? "cur" : ""}"></i>`;
   }).join("");
   return `<div class="hud"><span>Round ${Math.min(G.i + 1, ROUNDS)} / ${ROUNDS}</span><div class="dots">${dots}</div>
-    <span class="score">${G.score} pts${G.streak >= 2 ? ` · 🔥 ${G.streak}` : ""}</span></div>`;
+    <span class="score">${G.score} pts${G.streak >= 2 ? ` · ${G.streak} in a row` : ""}</span></div>`;
 }
 
 function ask() {
@@ -88,7 +85,7 @@ function ask() {
   $("game").innerHTML = `${hud()}
     <div class="panel taped mystery pop">
       <div class="flagbig">${flag(d.iso3)}</div>
-      <div class="q">${d.name}, ${d.year}.<br>Which moment in history does it most resemble?</div>
+      <div class="q">${d.name}, ${d.year}.<br>Which of these is its closest twin?</div>
       <div class="facts">${facts}</div>
     </div>
     <div class="opts">${opts.map((o, i) => `
@@ -113,19 +110,18 @@ function answer(i) {
     b.disabled = true; b.classList.add("reveal"); b.style.animation = "none";
     if (opts[j].correct) b.classList.add("right");
     else if (j === i) { b.classList.add("wrong"); b.style.animation = ""; }
-    if (j === i) b.insertAdjacentHTML("beforeend", `<span class="stamp ${ok ? "ok" : "no"}">${ok ? "On the nose" : "Nope"}</span>`);
+    if (j === i) b.insertAdjacentHTML("beforeend", `<span class="stamp ${ok ? "ok" : "no"}">${ok ? "Correct" : "Wrong"}</span>`);
   });
   if (ok) confetti(G.streak >= 3 ? 140 : 80);
   const c = opts.find(o => o.correct), t = c.t;
   const f = d.forecasts[GDP], end = f.fan[f.fan.length - 1];
   const g = Math.log(end[2] / f.base) / App.meta.horizon;
-  const cheers = ["Nailed it!", "Spot on!", "Sharp eye!", "Exactly right!", "You're a natural!"];
   $("g-verdict").innerHTML = `
     <div class="verdict pop">
-      <div class="big">${ok ? cheers[G.i % cheers.length] : `Not quite. It was ${flag(t.iso3)} ${t.name} in ${t.year}.`}</div>
-      <p style="margin:8px 0 0">What happened next: over the following decade, ${t.name}'s GDP per person
-        ${t.next_growth == null ? "is unknown" : `${t.next_growth >= 0 ? "grew" : "shrank"} <b>${(Math.abs(t.next_growth) * 100).toFixed(1)}%/yr</b>`}${t.next_le != null ? ` and life expectancy ${t.next_le >= 0 ? "rose" : "fell"} <b>${Math.abs(t.next_le).toFixed(1)} years</b>` : ""}.
-        Across all 12 look-alikes, our median forecast for ${d.name} is <b>${pct(g)}/yr</b>.</p>
+      <div class="big">${ok ? `Yes, it's ${t.name} in ${t.year}.` : `It was ${flag(t.iso3)} ${t.name} in ${t.year}.`}</div>
+      <p style="margin:8px 0 0">Over the next ten years, ${t.name}'s GDP per person
+        ${t.next_growth == null ? "isn't in the data" : `${t.next_growth >= 0 ? "grew" : "shrank"} <b>${(Math.abs(t.next_growth) * 100).toFixed(1)}% a year</b>`}${t.next_le != null ? ` and life expectancy ${t.next_le >= 0 ? "rose" : "fell"} <b>${Math.abs(t.next_le).toFixed(1)} years</b>` : ""}.
+        Using all 12 twins, our median forecast for ${d.name} is <b>${pct(g)} a year</b>.</p>
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
         <button class="btn" id="g-next">${G.i + 1 < ROUNDS ? "Next round →" : "See my score →"}</button>
         <button class="btn ghost" id="g-explore">Explore ${d.name}</button>
@@ -141,15 +137,14 @@ function next() {
   if (G.i < ROUNDS) return ask();
   G.phase = "end";
   const n = G.results.filter(Boolean).length;
-  const [, title, emoji] = [...RANKS].reverse().find(([min]) => n >= min);
+  const verdict = VERDICTS[n];
   const squares = G.results.map(r => (r ? "🟩" : "🟥")).join("");
-  const share = `Development Time Machine: Guess the Twin\n${squares} ${n}/${ROUNDS} · ${G.score} pts · ${title} ${emoji}`;
+  const share = `Guess the Twin ${n}/${ROUNDS}\n${squares}`;
   if (n >= 4) confetti(180);
   $("game").innerHTML = `
     <div class="panel taped end pop">
-      <div style="font-size:52px">${emoji}</div>
       <div class="score">${n}/${ROUNDS}</div>
-      <div class="passport">Certified · ${title}</div>
+      <div class="passport">${verdict}</div>
       <p class="muted" style="margin:6px 0 4px">${G.score} points</p>
       <div style="font-size:26px;letter-spacing:4px;margin:10px 0 20px">${squares}</div>
       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">

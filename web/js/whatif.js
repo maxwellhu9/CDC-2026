@@ -17,11 +17,11 @@ const LEVERS = [
 ];
 // Presets move levers relative to the country's current values.
 const PRESETS = [
-  ["🎓 Education push", { "SE.SEC.ENRR": v => v + 25, "SE.TER.ENRR": v => Math.max(v * 2, v + 10) }],
-  ["🏭 Factory of the world", { "NV.IND.MANF.ZS": v => v + 8, "NE.TRD.GNFS.ZS": v => v * 1.4, "NE.GDI.TOTL.ZS": v => v + 6 }],
-  ["👶 Demographic dividend", { "SP.DYN.TFRT.IN": v => Math.max(1.4, v - 1.5), "SP.POP.DPND": v => v - 20, "SH.DYN.MORT": v => v * 0.5 }],
-  ["🏙️ Urban leap", { "SP.URB.TOTL.IN.ZS": v => Math.min(95, v + 20) }],
-  ["🏛️ Bigger government", { "NE.CON.GOVT.ZS": v => v + 8 }],
+  ["More schooling", { "SE.SEC.ENRR": v => v + 25, "SE.TER.ENRR": v => Math.max(v * 2, v + 10) }],
+  ["More manufacturing", { "NV.IND.MANF.ZS": v => v + 8, "NE.TRD.GNFS.ZS": v => v * 1.4, "NE.GDI.TOTL.ZS": v => v + 6 }],
+  ["Lower fertility", { "SP.DYN.TFRT.IN": v => Math.max(1.4, v - 1.5), "SP.POP.DPND": v => v - 20, "SH.DYN.MORT": v => v * 0.5 }],
+  ["More urban", { "SP.URB.TOTL.IN.ZS": v => Math.min(95, v + 20) }],
+  ["Bigger government", { "NE.CON.GOVT.ZS": v => v + 8 }],
 ];
 let iso = null, base = null; // base: {z, raw{}, fan, twins, gdp, growth}
 const vals = {};             // current lever values (raw units)
@@ -75,14 +75,14 @@ function resetVals() {
 }
 
 function drawLevers() {
-  $("wi-levers").innerHTML = `<p class="ctitle" style="margin-bottom:4px">Levers</p><p class="cnote">Starting from ${App.data[iso].name} in ${base.year}. The dot on each slider marks where it starts.</p>` +
+  $("wi-levers").innerHTML = `<p class="ctitle" style="margin-bottom:4px">Indicators</p><p class="cnote">Starting from ${App.data[iso].name} in ${base.year}. The tick on each slider marks the real value.</p>` +
     LEVERS.map(([code, label]) => {
       const [lo, hi] = range(code), b = base.raw[code], v = vals[code] ?? b;
       const step = (hi - lo) / 200;
       const mark = b == null ? "" : `background: linear-gradient(90deg, transparent calc(${((b - lo) / (hi - lo)) * 100}% - 1px), var(--ink-3) calc(${((b - lo) / (hi - lo)) * 100}% - 1px), var(--ink-3) calc(${((b - lo) / (hi - lo)) * 100}% + 1px), transparent calc(${((b - lo) / (hi - lo)) * 100}% + 1px)) no-repeat 0 50% / 100% 10px;`;
       return `<div class="lever">
         <div class="top"><span>${label}</span><span class="val" id="lv-${cssId(code)}"></span></div>
-        <input type="range" data-code="${code}" min="${lo}" max="${hi}" step="${step}" value="${v ?? (lo + hi) / 2}" style="${mark}" ${b == null ? 'title="No recent data: moving this adds it to the fingerprint"' : ""}>
+        <input type="range" data-code="${code}" min="${lo}" max="${hi}" step="${step}" value="${v ?? (lo + hi) / 2}" style="${mark}" ${b == null ? 'title="No recent data. Moving this adds it to the match."' : ""}>
       </div>`;
     }).join("");
   $("wi-levers").querySelectorAll("input").forEach(inp => {
@@ -117,10 +117,10 @@ function update(first = false) {
     ${flag(t.iso3)} <span class="tw">${t.name}</span> in ${t.year} <span class="muted small">(${t.similarity.toFixed(0)}% match)</span>`;
   const baseSet = new Set(base.twins.map(x => x.iso3 + x.year));
   $("wi-twins").innerHTML = twins.slice(0, 8).map(x => `<span class="${baseSet.has(x.iso3 + x.year) ? "" : "new"}">${flag(x.iso3)} ${x.name} ${x.year}</span>`).join("") +
-    (twins.some(x => !baseSet.has(x.iso3 + x.year)) ? `<span class="muted small" style="background:none">highlighted = new look-alike</span>` : "");
+    (twins.some(x => !baseSet.has(x.iso3 + x.year)) ? `<span class="muted small" style="background:none;box-shadow:none">highlighted = new twin</span>` : "");
   const same = Math.abs(g - base.growth) < 5e-5;
   $("wi-delta").innerHTML = same
-    ? `<span class="to" id="wi-g"></span><span class="muted">/yr · move a slider or try a preset</span>`
+    ? `<span class="to" id="wi-g"></span><span class="muted">a year · move a slider or pick a preset</span>`
     : `<span class="from">${pct(base.growth)}</span><span class="arrow">→</span><span class="to" id="wi-g" style="color:${g > base.growth ? "var(--you)" : "var(--twin)"}"></span><span class="muted">/yr (${g > base.growth ? "+" : "−"}${Math.abs((g - base.growth) * 100).toFixed(1)} pts)</span>`;
   countUp($("wi-g"), first || lastGrowth == null ? g : lastGrowth, g, v => pct(v), 350);
   lastGrowth = g;

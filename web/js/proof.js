@@ -4,7 +4,7 @@ import { GDP, $, fmtUSD } from "./util.js";
 import { scoreBars } from "./charts.js";
 
 const LABELS = { no_change: "No change", global_avg: "Historical average", momentum: "Own trend continues",
-  ridge: "Linear regression", analog_era: "Look-alikes", blend: "Look-alikes + regression" };
+  ridge: "Linear regression", analog_era: "Twins", blend: "Twins + regression" };
 const UNITS = { [GDP]: v => (v * 100).toFixed(1) + " pts", "SP.DYN.LE00.IN": v => v.toFixed(2) + " yrs",
   "SH.DYN.MORT": v => (v * 100).toFixed(1) + " pts", "SP.URB.TOTL.IN.ZS": v => v.toFixed(2) + " pts" };
 const DESC = { [GDP]: "Avg. error in 10-yr GDP-per-person growth (log pts)", "SP.DYN.LE00.IN": "Avg. error in 10-yr life-expectancy change",
@@ -27,12 +27,12 @@ function draw() {
     scoreBars(chart, { rows, fmt: UNITS[code], best: rows[0].k, labels: LABELS, ours: k => k === "analog_era" || k === "blend" });
   }
   const gd = bt[GDP].by_model, le = bt["SP.DYN.LE00.IN"].by_model;
-  $("pf-note").innerHTML = `<b>The verdict:</b> combining look-alikes with a regression gives the lowest error for GDP
-    (${((1 - gd.blend.mae / gd.global_avg.mae) * 100).toFixed(0)}% better than the historical average) and life expectancy
-    (${((1 - le.blend.mae / le.global_avg.mae) * 100).toFixed(0)}% better). For urbanization, which changes slowly and smoothly,
-    simply extending a country's own trend wins. For child mortality the historical average narrowly wins, because most
-    countries follow the same steady decline. We report both openly. The look-alikes' 80% ranges contained the real GDP
-    outcome ${(bt[GDP].coverage80_era * 100).toFixed(0)}% of the time.`;
+  $("pf-note").innerHTML = `Averaging the twins with a regression had the lowest error for GDP
+    (${((1 - gd.blend.mae / gd.global_avg.mae) * 100).toFixed(0)}% lower than the historical average) and for life expectancy
+    (${((1 - le.blend.mae / le.global_avg.mae) * 100).toFixed(0)}% lower). It lost on the other two. Urbanization changes so smoothly
+    that continuing a country's own trend works best, and for child mortality the historical average is slightly better because
+    most countries decline at a similar rate. The twins' 80% ranges contained the real GDP outcome
+    ${(bt[GDP].coverage80_era * 100).toFixed(0)}% of the time, so they're a bit too narrow.`;
 }
 
 async function liveCheck() {
@@ -42,7 +42,7 @@ async function liveCheck() {
   try {
     const r = await fetch(`https://api.worldbank.org/v2/country/${c}/indicator/${GDP}?format=json&mrnev=1`).then(r => r.json());
     const obs = r[1][0];
-    el.innerHTML = `🟢 Live check, just now: <code>api.worldbank.org/v2/country/${c}/indicator/${GDP}?mrnev=1</code> →
+    el.innerHTML = `Live API check from your browser: <code>api.worldbank.org/v2/country/${c}/indicator/${GDP}?mrnev=1</code> →
       <b>${obs.country.value}, ${obs.date}: ${fmtUSD(obs.value)}</b> per person (API last updated ${r[0].lastupdated}).`;
   } catch { el.textContent = "Live API check unavailable offline. The precomputed data is shown."; }
 }

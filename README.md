@@ -1,21 +1,21 @@
 # Development Time Machine
 
-**Every country has been here before.** Pick a country and we find the moments in the last 55 years when other
-countries looked most like it does today (for example, *Vietnam 2025 ≈ Thailand 2005* or *India 2025 ≈ China 2002*).
-Then we use what actually happened to those look-alikes over the next decade to forecast a range of possible futures.
+Pick a country and it finds the countries that looked most like it at some point since 1970. Vietnam today
+matches Thailand in 2005, and India today matches China in 2002. Then it looks at what happened to those countries
+over the next ten years and uses that as a forecast range.
 
-Carolina Data Challenge 2026, Graduate Track. All data comes from the World Bank Indicators API.
+Live site: https://maxwellhu9.github.io/cdc-time-machine/
 
-## Why this approach
+Built for the Carolina Data Challenge 2026 (theme: AI for Social Good), graduate track. All data comes from the World
+Bank Indicators API.
 
-Most development forecasts are regressions: one formula fitted to every country at once. We use **analog forecasting**
-instead, a technique from meteorology: find the past states most similar to the present and see what came next. It has
-three advantages:
+## Why nearest neighbors
 
-- **Explainable.** "You look like Korea in 2002, and here is what Korea did next" is a statement anyone can check.
-- **Honest uncertainty.** The range comes from real historical outcomes, including crashes and booms, not from an
-  assumed bell curve.
-- **Tested.** Every forecast method is backtested with no look-ahead (see below).
+The model is k-nearest neighbors run across time. Weather forecasters have done this since the 1960s (analog
+forecasting): find past moments that looked like now and see what came next. We went with it because every forecast
+comes with its reasons. "You look like Korea in 2002, and here is what Korea did next" is something a planner can
+check and disagree with, which you can't do with a black-box number. It also didn't cost accuracy. In the backtest
+below, the twins averaged with a regression beat the regression alone on all four outcomes.
 
 ## Pipeline
 
@@ -32,11 +32,11 @@ web/                   static site (D3, ES modules), no build step; installable 
 
 | Page | What it does |
 |---|---|
-| **Explore** | A country's 12 look-alikes, ghost paths, a Rewind slider that re-runs the search live for any past year, the fingerprint comparison, and health and urbanization forecasts |
-| **Play** | *Guess the Twin*: 5 rounds, pick a country's historical look-alike from 4 options, share a Wordle-style result |
-| **What if** | Move policy-style levers (education, fertility, manufacturing…) and watch the look-alikes and forecast change live |
-| **World** | Map of projected growth, or of "which era each country lives in," with top and bottom 10 lists |
-| **Proof** | Backtest scorecard, method, and a live World Bank API call |
+| **Explore** | A country's 12 twins, their actual next decades, a slider that re-runs the search for any past year, an indicator-by-indicator comparison, health and urbanization forecasts, and what the fastest-growing twins had in common |
+| **Play** | Guess the Twin: 5 rounds, pick a country's closest twin from 4 options |
+| **What if** | Change a country's indicators with sliders and see the twins and forecast update |
+| **World** | Map of projected growth or of the year each country's closest twin is from, with top and bottom 10 lists |
+| **Proof** | Backtest results, method notes, and a live World Bank API call |
 
 ```bash
 uv sync

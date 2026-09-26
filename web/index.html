@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Development Time Machine</title>
-<meta name="description" content="Every country has been here before. Find a country's historical look-alikes and see what happened next.">
+<meta name="description" content="Match any country to the countries that looked like it in the past, and see what happened to them next. Built on World Bank data.">
 <meta name="theme-color" content="#d9bc92" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#2a231c" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -46,8 +46,8 @@
     <div class="doodle hide-sm" data-doodle="sparkle" style="right:16%;top:40px;width:26px;height:26px"></div>
     <div class="doodle hide-sm" data-doodle="sparkle" style="right:1%;top:120px;width:18px;height:18px"></div>
     <div class="kicker">Carolina Data Challenge 2026 · Graduate Track</div>
-    <h1 class="ransom scribble" data-ransom="Every country has been here before.">Every country has been here before.</h1>
-    <p class="lede">Pick a country. We search 55 years of World Bank data for the moments other countries looked most like it does today, then use what happened to them <em>next</em> to sketch its possible futures.</p>
+    <h1 class="ransom scribble" data-ransom="Find a country's past twin">Find a country's past twin</h1>
+    <p class="lede">Pick a country. We compare it with every other country in every year since 1970 on 18 World Bank indicators, find the closest matches from before 2015, and look at how those countries did over the following ten years.</p>
     <div class="picker">
       <input id="ex-search" list="clist" placeholder="Type a country…" autocomplete="off" aria-label="Choose a country">
       <button class="btn ghost" id="ex-random" title="Random country">🎲 Surprise me</button>
@@ -59,23 +59,23 @@
     <div class="headline" id="ex-headline"></div>
 
     <section class="block">
-      <h2>Its closest look-alikes</h2>
-      <p class="sub">Each card is one country at the moment it most resembled this one across 18 indicators. We only search years up to <span class="maxyr"></span>, so we already know what the following decade brought. Tap a card to compare.</p>
+      <h2>Closest twins</h2>
+      <p class="sub">Each card is a country in the year it looked most like this one does now. We only match years up to <span class="maxyr"></span>, so we can see the full ten years that came after. Click a card to compare it.</p>
       <div class="twins" id="ex-twins"></div>
     </section>
 
     <section class="block">
-      <h2>Ghost paths</h2>
-      <p class="sub">Each gray line is one look-alike's real GDP per person over the following decade, rescaled to start from where this country is today. The shaded band covers the middle 80% of those futures. Hover over a line to see whose it is, or click to select it.</p>
+      <h2>What happened to the twins next</h2>
+      <p class="sub">Each gray line is one twin's actual GDP per person over the ten years after its match, scaled to start at this country's current level. The shaded band covers the middle 80% of those paths. Hover over a line to see which twin it is, or click to select it.</p>
       <div class="panel taped">
-        <div class="legend"><span style="--c:var(--you)">This country</span><span style="--c:var(--twin)">Selected look-alike</span><span style="--c:var(--ghost)">Other look-alikes</span><span class="dash" style="--c:var(--you)">Median forecast</span><span class="band">80% range</span></div>
+        <div class="legend"><span style="--c:var(--you)">This country</span><span style="--c:var(--twin)">Selected twin</span><span style="--c:var(--ghost)">Other twins</span><span class="dash" style="--c:var(--you)">Median forecast</span><span class="band">80% range</span></div>
         <div id="ex-ghost"></div>
       </div>
     </section>
 
     <section class="block">
-      <h2>Rewind</h2>
-      <p class="sub">Drag through this country's history. Each year, the engine runs a fresh search in your browser for who it resembled at that time.</p>
+      <h2>Twins over time</h2>
+      <p class="sub">Drag the slider to see who this country matched in earlier years. The search runs live in your browser each time.</p>
       <div class="panel taped rewind">
         <div>
           <div class="now" id="rw-text"></div>
@@ -90,15 +90,22 @@
     </section>
 
     <section class="block">
-      <h2>Fingerprint</h2>
-      <p class="sub">How the selected look-alike compares on every indicator, measured in standard deviations from the world average. A short line between the dots means a close match.</p>
+      <h2>How close is the match?</h2>
+      <p class="sub">Each row is one indicator, in standard deviations from the world average. Blue is this country now and orange is the selected twin. Shorter lines mean a closer match.</p>
       <div class="panel taped graph"><div id="ex-finger"></div></div>
     </section>
 
     <section class="block">
-      <h2>Beyond income</h2>
-      <p class="sub">The same look-alikes, applied to health and cities.</p>
+      <h2>Health and cities</h2>
+      <p class="sub">The same twins, applied to life expectancy, child mortality, and urbanization.</p>
       <div class="grid3" id="ex-small"></div>
+    </section>
+
+    <section class="block">
+      <h2>What the fast-growing twins had in common</h2>
+      <p class="sub">We split the twins into the half that grew fastest over their next decade and the half that grew slowest, then looked at where the two groups differed most at the time of the match.</p>
+      <div class="panel taped graph"><div id="ex-lessons-text" class="lessons"></div><div id="ex-lessons"></div>
+        <p class="caveat" id="ex-lessons-note">Twelve countries is a small sample, and this is correlation. It's a good place to start reading about a country, not a conclusion.</p></div>
     </section>
   </div>
 
@@ -107,9 +114,8 @@
 
   <!-- ================= WHAT IF ================= -->
   <div class="page" id="page-whatif">
-    <div class="kicker">Scenario sandbox</div>
-    <h1 class="scribble">What if…?</h1>
-    <p class="lede">Change a country's indicators and see whose history it would be following. Every slider move re-runs the look-alike search on about 12,000 country-years.</p>
+    <h1 class="scribble">What if?</h1>
+    <p class="lede">Change a country's numbers with the sliders and see which countries it would match instead. Every change re-runs the search over about 12,000 country-years, and the forecast updates with the new twins.</p>
     <div class="picker">
       <input id="wi-search" list="clist" placeholder="Start from a country…" autocomplete="off" aria-label="Starting country">
       <button class="btn ghost" id="wi-reset">↺ Reset</button>
@@ -123,11 +129,11 @@
           <div class="minitw" id="wi-twins"></div>
         </div>
         <div class="panel" style="margin-top:16px">
-          <p class="ctitle">Median GDP-per-person growth, next 10 years</p>
+          <p class="ctitle">Median GDP per person growth, next 10 years</p>
           <div class="delta" id="wi-delta"></div>
           <div class="legend" style="margin-top:12px"><span style="--c:var(--ghost)">Starting point</span><span style="--c:var(--you)">Your scenario</span><span class="band">80% range</span></div>
           <div id="wi-chart"></div>
-          <p class="caveat">This shows whose <em>history</em> your scenario resembles. It is not a causal claim that changing one number causes growth. Treat it as a way to explore precedents, not a policy prescription.</p>
+          <p class="caveat">This shows which countries' histories your scenario looks like. It doesn't mean that changing one number would cause the growth.</p>
         </div>
       </div>
     </div>
@@ -135,12 +141,11 @@
 
   <!-- ================= WORLD ================= -->
   <div class="page" id="page-world">
-    <div class="kicker">The whole planet</div>
-    <h1 class="scribble">The next decade, everywhere.</h1>
-    <p class="lede">Every country's forecast on one map. Tap any country to explore it.</p>
+    <h1 class="scribble">Every country at once</h1>
+    <p class="lede">Median GDP per person growth over the next ten years, based on each country's twins. Or switch to see what year each country's closest twin is from. Click a country to open it.</p>
     <div class="toggle" id="w-toggle" style="margin-top:20px">
-      <button data-m="growth" class="on">📈 Projected growth</button>
-      <button data-m="era">⏳ Which era it lives in</button>
+      <button data-m="growth" class="on">Projected growth</button>
+      <button data-m="era">Year of closest twin</button>
     </div>
     <div class="panel taped"><div id="w-map"></div><div id="w-key"></div></div>
     <div class="grid2" style="margin-top:16px">
@@ -151,39 +156,56 @@
 
   <!-- ================= PROOF ================= -->
   <div class="page" id="page-proof">
-    <div class="kicker">Does it actually work?</div>
-    <h1 class="scribble">We tried to fool ourselves. Here's what happened.</h1>
-    <p class="lede">We stood in 1995, 2000, 2005, 2010 and 2014 and made 10-year forecasts using <em>only</em> data available at the time. Then we compared them with what really happened: about 1,000 forecasts per outcome. Lower error is better.</p>
+    <div class="kicker">Backtest</div>
+    <h1 class="scribble">Does it work?</h1>
+    <p class="lede">We pretended it was 1995, 2000, 2005, 2010, and 2014, made ten-year forecasts using only the data available at the time, and checked them against what actually happened. That's about 1,000 forecasts per outcome.</p>
 
     <section class="block">
-      <h2>How a forecast is made</h2>
+      <h2>How it works</h2>
       <div class="steps" style="margin-top:14px">
-        <div class="step"><div class="e">🛰️</div><b>1 · Pull</b><p>17 indicators × 217 economies × 1970–2025, straight from the World Bank Indicators API.</p></div>
-        <div class="step"><div class="e">🧬</div><b>2 · Fingerprint</b><p>Each country-year becomes 18 z-scores covering income, economic structure, health, demography, education, size and momentum.</p></div>
-        <div class="step"><div class="e">🔎</div><b>3 · Match</b><p>A weighted distance to about 12,000 past country-years. We keep each country's best match and take the 12 closest.</p></div>
-        <div class="step"><div class="e">👻</div><b>4 · Replay</b><p>Their real next decades, corrected for each era's global shocks, become the forecast range.</p></div>
+        <div class="step"><div class="num">1</div><b>Pull the data</b><p>17 indicators for 217 economies from 1970 to 2025, from the World Bank Indicators API.</p></div>
+        <div class="step"><div class="num">2</div><b>Describe each year</b><p>Every country-year becomes 18 standardized numbers: income, economic structure, health, population, schooling, size, and recent growth.</p></div>
+        <div class="step"><div class="num">3</div><b>Find the twins</b><p>Measure the distance to every earlier country-year, keep each country's best match, and take the 12 closest.</p></div>
+        <div class="step"><div class="num">4</div><b>Replay their decade</b><p>The twins' actual next ten years, adjusted for what the whole world went through at the time, become the forecast range.</p></div>
       </div>
     </section>
 
     <section class="block">
-      <h2>Scorecard</h2>
+      <h2>Results</h2>
       <div class="grid2" id="pf-scores" style="margin-top:14px"></div>
       <p class="muted" id="pf-note" style="margin-top:14px"></p>
     </section>
 
+    <section class="block">
+      <h2>Why nearest neighbors</h2>
+      <div class="grid2" style="margin-top:14px">
+        <div class="panel taped">
+          <p class="ctitle">Every forecast shows its work</p>
+          <p style="margin:6px 0 0">The model is k-nearest neighbors, a basic machine learning method, run across time instead of across people or products. We picked it because every forecast comes with its reasons: the twelve real countries it's based on. If someone at a finance ministry or an aid agency thinks Korea in 2002 is a bad comparison for their country, they can see that and discount the forecast. With a black-box model they'd have to take the number on trust. We didn't give up accuracy for this either. In the backtest, the twins plus a simple regression beat the regression alone on all four outcomes.</p>
+        </div>
+        <div class="panel taped">
+          <p class="ctitle">Who could use it</p>
+          <ul class="plain">
+            <li><b>Planners and NGOs</b> looking for countries that were in the same spot and what those countries did.</li>
+            <li><b>Journalists</b> checking whether a government's growth target has ever been hit from a similar starting point.</li>
+            <li><b>Students</b> learning development economics, who can see the textbook cases (Korea, Botswana, Poland) as real data.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section class="block method">
-      <h2>The fine print</h2>
+      <h2>Method notes</h2>
       <div class="panel graph terms">
-        <h3>Terms &amp; Conditions of Forecasting</h3>
         <ol>
-          <li><b>Data.</b> Every number is pulled by a Python pipeline from <code>api.worldbank.org/v2/country/all/indicator/{code}</code>, following the pagination. We drop regional aggregates using <code>/v2/country</code> metadata and interpolate small gaps within each country.</li>
-          <li><b>Fingerprint.</b> Each country-year is 18 z-scores covering income, economic structure, health, demography, education, size and momentum. Skewed indicators are logged. Income counts double, and every other category counts equally.</li>
-          <li><b>No time-bound tech.</b> Mobile phones and the internet are left out, so that 1985 and 2025 can be compared fairly.</li>
-          <li><b>Matching.</b> Weighted RMS distance over the indicators both country-years report, with at least 60% of the weight overlapping. We keep each country's single best year and take the 12 closest, with Gaussian kernel weights (bandwidth = median distance).</li>
-          <li><b>Era correction.</b> A 1981 look-alike then lived through the 1980s debt crisis. So we measure each look-alike's growth against the world median in its own decade, then add back the long-run average. This is analog forecasting (Lorenz, 1969), a technique from meteorology applied to development data.</li>
-          <li><b>No peeking.</b> In the backtest, the pool of look-alikes, the z-score scaling and every baseline's training data only use what was known at each origin year.</li>
-          <li><b>Side effects may include humility.</b> History rhymes rather than repeats. Look-alikes capture structure, not policy, conflict or luck. Our 80% ranges contain the truth about 70–78% of the time, so they are a bit too narrow.</li>
-          <li><b>Not financial or policy advice.</b> The What-if page shows whose <em>history</em> a scenario resembles, not what causes growth.</li>
+          <li><b>Data.</b> A Python pipeline pulls every indicator from <code>api.worldbank.org/v2/country/all/indicator/{code}</code> and follows the pagination. Regional aggregates are dropped using the <code>/v2/country</code> metadata, and short gaps are filled in within each country.</li>
+          <li><b>Features.</b> 18 standardized values per country-year. Skewed ones (GDP, population, child mortality, trade) are logged first. Income counts double in the distance, and each other category counts the same.</li>
+          <li><b>Left out on purpose.</b> Mobile phones, internet use, and anything else that only exists in recent decades. Otherwise every country today would just match another country today.</li>
+          <li><b>Matching.</b> Weighted RMS distance over the indicators both years report, with at least 60% of the weight overlapping. We keep each country's single closest year, take the 12 closest countries, and weight them with a Gaussian kernel.</li>
+          <li><b>Era adjustment.</b> A twin from 1981 went straight into the 1980s debt crisis. We measure each twin's growth relative to the world median over the same years, then add back the long-run average. The idea comes from analog weather forecasting (Lorenz, 1969).</li>
+          <li><b>No peeking.</b> In the backtest, the twin pool, the standardization, and every baseline model only use data from before each starting year.</li>
+          <li><b>Limits.</b> Twins capture where a country is, not its politics, wars, or luck. The 80% ranges contain the real outcome 70 to 78% of the time, so they're somewhat too narrow.</li>
+          <li><b>What if and lessons.</b> Both show correlations in historical data. Neither tells you what causes growth.</li>
         </ol>
         <p class="live" id="pf-live"></p>
       </div>
