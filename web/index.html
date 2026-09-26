@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Development Time Machine</title>
+<meta name="description" content="Every country has been here before. Find a country's historical look-alikes and see what happened next.">
+<meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121211" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Time Machine">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav">
+  <a class="brand" href="#/explore">
+    <svg class="dial" viewBox="0 0 512 512" aria-hidden="true"><path d="M124.9 176.2A160 160 0 1 1 98.4 295.8" fill="none" stroke="var(--you)" stroke-width="44" stroke-linecap="round"/><polygon points="92,222 172,196 94,140" fill="var(--you)" stroke="var(--you)" stroke-width="18" stroke-linejoin="round"/><path d="M256 180v88l-56 38" fill="none" stroke="var(--twin)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Time Machine
+  </a>
+  <div class="tabs" role="tablist">
+    <a class="tab" data-page="explore" href="#/explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Explore</a>
+    <a class="tab" data-page="play" href="#/play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/><circle cx="15" cy="15" r="1.2" fill="currentColor"/><circle cx="15" cy="9" r="1.2" fill="currentColor"/><circle cx="9" cy="15" r="1.2" fill="currentColor"/></svg>Play</a>
+    <a class="tab" data-page="whatif" href="#/whatif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>What if</a>
+    <a class="tab" data-page="world" href="#/world"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.5 5.7 3.5 9s-1 6.3-3.5 9c-2.5-2.7-3.5-5.7-3.5-9S9.5 5.7 12 3z"/></svg>World</a>
+    <a class="tab" data-page="proof" href="#/proof"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.5 3.2 8 7.5 9.5 4.3-1.5 7.5-5 7.5-9.5V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Proof</a>
+  </div>
+</nav>
+
+<main>
+  <!-- ================= EXPLORE ================= -->
+  <div class="page" id="page-explore">
+    <div class="kicker">Carolina Data Challenge 2026 · Graduate Track</div>
+    <h1>Every country has been here before.</h1>
+    <p class="lede">Pick a country. We search 55 years of World Bank data for the moments other countries looked most like it does today, then use what happened to them <em>next</em> to sketch its possible futures.</p>
+    <div class="picker">
+      <input id="ex-search" list="clist" placeholder="Type a country…" autocomplete="off" aria-label="Choose a country">
+      <button class="btn ghost" id="ex-random" title="Random country">🎲 Surprise me</button>
+    </div>
+    <div class="chips" id="ex-quick" style="margin-top:10px"></div>
+
+    <div class="headline" id="ex-headline"></div>
+
+    <section class="block">
+      <h2>Its closest look-alikes</h2>
+      <p class="sub">Each card is one country at the moment it most resembled this one across 18 indicators. We only search years up to <span class="maxyr"></span>, so we already know what the following decade brought. Tap a card to compare.</p>
+      <div class="twins" id="ex-twins"></div>
+    </section>
+
+    <section class="block">
+      <h2>Ghost paths</h2>
+      <p class="sub">Each gray line is one look-alike's real GDP per person over the following decade, rescaled to start from where this country is today. The shaded band covers the middle 80% of those futures. Hover over a line to see whose it is, or click to select it.</p>
+      <div class="panel">
+        <div class="legend"><span style="--c:var(--you)">This country</span><span style="--c:var(--twin)">Selected look-alike</span><span style="--c:var(--ghost)">Other look-alikes</span><span class="dash" style="--c:var(--you)">Median forecast</span><span class="band">80% range</span></div>
+        <div id="ex-ghost"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Rewind</h2>
+      <p class="sub">Drag through this country's history. Each year, the engine runs a fresh search in your browser for who it resembled at that time.</p>
+      <div class="panel rewind">
+        <div>
+          <div class="now" id="rw-text"></div>
+          <div class="ctrl">
+            <button class="btn ghost" id="rw-play" aria-label="Play">▶</button>
+            <input type="range" id="rw-year" aria-label="Year">
+            <span class="yearbig" id="rw-label"></span>
+          </div>
+        </div>
+        <div id="rw-chart"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Fingerprint</h2>
+      <p class="sub">How the selected look-alike compares on every indicator, measured in standard deviations from the world average. A short line between the dots means a close match.</p>
+      <div class="panel"><div id="ex-finger"></div></div>
+    </section>
+
+    <section class="block">
+      <h2>Beyond income</h2>
+      <p class="sub">The same look-alikes, applied to health and cities.</p>
+      <div class="grid3" id="ex-small"></div>
+    </section>
+  </div>
+
+  <!-- ================= PLAY ================= -->
+  <div class="page" id="page-play"><div class="game" id="game"></div></div>
+
+  <!-- ================= WHAT IF ================= -->
+  <div class="page" id="page-whatif">
+    <div class="kicker">Scenario sandbox</div>
+    <h1>What if…?</h1>
+    <p class="lede">Change a country's indicators and see whose history it would be following. Every slider move re-runs the look-alike search on about 12,000 country-years.</p>
+    <div class="picker">
+      <input id="wi-search" list="clist" placeholder="Start from a country…" autocomplete="off" aria-label="Starting country">
+      <button class="btn ghost" id="wi-reset">↺ Reset</button>
+    </div>
+    <div class="chips" id="wi-presets" style="margin-top:10px"></div>
+    <div class="wi" style="margin-top:20px">
+      <div class="panel levers" id="wi-levers"></div>
+      <div>
+        <div class="panel">
+          <div class="resembles" id="wi-resembles"></div>
+          <div class="minitw" id="wi-twins"></div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <p class="ctitle">Median GDP-per-person growth, next 10 years</p>
+          <div class="delta" id="wi-delta"></div>
+          <div class="legend" style="margin-top:12px"><span style="--c:var(--ghost)">Starting point</span><span style="--c:var(--you)">Your scenario</span><span class="band">80% range</span></div>
+          <div id="wi-chart"></div>
+          <p class="caveat">This shows whose <em>history</em> your scenario resembles. It is not a causal claim that changing one number causes growth. Treat it as a way to explore precedents, not a policy prescription.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WORLD ================= -->
+  <div class="page" id="page-world">
+    <div class="kicker">The whole planet</div>
+    <h1>The next decade, everywhere.</h1>
+    <p class="lede">Every country's forecast on one map. Tap any country to explore it.</p>
+    <div class="toggle" id="w-toggle" style="margin-top:20px">
+      <button data-m="growth" class="on">📈 Projected growth</button>
+      <button data-m="era">⏳ Which era it lives in</button>
+    </div>
+    <div class="panel"><div id="w-map"></div><div id="w-key"></div></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="panel"><p class="ctitle" id="w-top-t"></p><ol class="rank" id="w-top"></ol></div>
+      <div class="panel"><p class="ctitle" id="w-bot-t"></p><ol class="rank" id="w-bot"></ol></div>
+    </div>
+  </div>
+
+  <!-- ================= PROOF ================= -->
+  <div class="page" id="page-proof">
+    <div class="kicker">Does it actually work?</div>
+    <h1>We tried to fool ourselves. Here's what happened.</h1>
+    <p class="lede">We stood in 1995, 2000, 2005, 2010 and 2014 and made 10-year forecasts using <em>only</em> data available at the time. Then we compared them with what really happened: about 1,000 forecasts per outcome. Lower error is better.</p>
+
+    <section class="block">
+      <h2>How a forecast is made</h2>
+      <div class="steps" style="margin-top:14px">
+        <div class="step"><div class="e">🛰️</div><b>1 · Pull</b><p>17 indicators × 217 economies × 1970–2025, straight from the World Bank Indicators API.</p></div>
+        <div class="step"><div class="e">🧬</div><b>2 · Fingerprint</b><p>Each country-year becomes 18 z-scores covering income, economic structure, health, demography, education, size and momentum.</p></div>
+        <div class="step"><div class="e">🔎</div><b>3 · Match</b><p>A weighted distance to about 12,000 past country-years. We keep each country's best match and take the 12 closest.</p></div>
+        <div class="step"><div class="e">👻</div><b>4 · Replay</b><p>Their real next decades, corrected for each era's global shocks, become the forecast range.</p></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Scorecard</h2>
+      <div class="grid2" id="pf-scores" style="margin-top:14px"></div>
+      <p class="muted" id="pf-note" style="margin-top:14px"></p>
+    </section>
+
+    <section class="block method">
+      <h2>Method details</h2>
+      <p><b>Data.</b> A Python pipeline calls <code>api.worldbank.org/v2/country/all/indicator/{code}</code> for each indicator and follows the pagination. Regional aggregates are dropped using <code>/v2/country</code> metadata, and small gaps are interpolated within each country.</p>
+      <p><b>Fingerprint.</b> Skewed indicators are log-transformed, and every indicator is converted to a z-score. Categories are weighted equally, except income, which counts double. We leave out era-specific technology like mobile phones, so 1985 and 2025 can be compared fairly.</p>
+      <p><b>Matching.</b> Weighted RMS distance over the indicators both country-years report, with at least 60% of the weight overlapping. Matches are kernel-weighted with a Gaussian, bandwidth = median distance.</p>
+      <p><b>Era correction.</b> A 1981 look-alike then lived through the 1980s debt crisis. So we measure each look-alike's growth relative to the world median in its own decade, then add back the long-run average. This is <em>analog forecasting</em> (Lorenz, 1969), a technique from meteorology applied to development data.</p>
+      <p><b>No look-ahead.</b> In the backtest, the pool of look-alikes, the z-score scaling and every baseline's training data only use what was known at each origin year.</p>
+      <p><b>Limits.</b> History rhymes rather than repeats. Look-alikes capture structure, not policy, conflict or luck. Our 80% ranges contain the true outcome about 70–78% of the time, so they are slightly too narrow.</p>
+      <p class="live" id="pf-live"></p>
+    </section>
+    <footer>Data: World Bank Open Data (CC BY 4.0). Built for Carolina Data Challenge 2026.</footer>
+  </div>
+</main>
+
+<datalist id="clist"></datalist>
+<div class="tip" id="tip"></div>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
