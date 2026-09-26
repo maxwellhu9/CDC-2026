@@ -4,7 +4,7 @@ Pick a country and it finds the countries that looked most like it at some point
 matches Thailand in 2005, and India today matches China in 2002. Then it looks at what happened to those countries
 over the next ten years and uses that as a forecast range.
 
-Live site: https://maxwellhu9.github.io/cdc-time-machine/
+Live site: https://maxwellhu9.github.io/CDC-2026/
 
 Built for the Carolina Data Challenge 2026 (theme: AI for Social Good), graduate track. All data comes from the World
 Bank Indicators API.
